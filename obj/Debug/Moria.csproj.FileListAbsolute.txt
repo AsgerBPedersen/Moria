@@ -1,0 +1,7 @@
+C:\Users\asge4899\source\repos\Moria\Moria\bin\Debug\Moria.exe.config
+C:\Users\asge4899\source\repos\Moria\Moria\bin\Debug\Moria.exe
+C:\Users\asge4899\source\repos\Moria\Moria\bin\Debug\Moria.pdb
+C:\Users\asge4899\source\repos\Moria\Moria\obj\Debug\Moria.csprojAssemblyReference.cache
+C:\Users\asge4899\source\repos\Moria\Moria\obj\Debug\Moria.csproj.CoreCompileInputs.cache
+C:\Users\asge4899\source\repos\Moria\Moria\obj\Debug\Moria.exe
+C:\Users\asge4899\source\repos\Moria\Moria\obj\Debug\Moria.pdb
