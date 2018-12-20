@@ -14,6 +14,17 @@ namespace Moria
         private Room west;
         private string relativeDirection;
         private string approachDescription;
+        private Item item = new Sword() {
+            Description = "a tiny sword",
+            Name = "Bobs Sword"
+        };
+
+        public Item Item
+        {
+            get { return item; }
+            set { item = value; }
+        }
+
 
         public string ApproachDescription
         {
@@ -73,6 +84,10 @@ namespace Moria
         public string GetDescription()
         {
             string output = Description;
+            if(Item != null)
+            {
+                output = output + $"\n\n You found {Item.Description}";
+            }
             if(Gold > 0)
             {
                 output = output + $"\n\n You found {Gold} gold";

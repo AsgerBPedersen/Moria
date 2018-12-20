@@ -61,36 +61,17 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
             {
 
             }
-            Room room3 = new Room()
-            {
-                Description = "You found the exit!",
-                ApproachDescription = "You can see something that looks like daylight"
-            };
-            Room room2 = new Room()
-            {
-                Gold = 5,
-                Description = "You find yourself in a dark cavern with a fire in the middle",
-                ApproachDescription = "You see light in the darkness",
-                East = room3
-            };
-            room3.West = room2;
-            Room room1 = new Room()
-            {
-                Gold = 0,
-                Description = "You are in dank corridor",
-                ApproachDescription = "You see an opening to a passage",
-                North = room2
-            };
-            room2.South = room1;
+        
+           
             Game game = new Game
             {
                 Player = new Player()
                 {
                     Name = "Asger",
-                    CurrentGold = 0,
-                    CurrentRoom = room1
+                    CurrentGold = 0
                 }
             };
+            game.MakeMap();
             Console.Clear();
             while (true)
             {

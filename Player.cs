@@ -12,6 +12,14 @@ namespace Moria
         private Room currentRoom;
         private int currentGold;
         private int healthPoints;
+        private List<Item> items = new List<Item>();
+
+        public List<Item> Items
+        {
+            get { return items; }
+            set { items = value; }
+        }
+
 
         public int HealthPoints
         {
