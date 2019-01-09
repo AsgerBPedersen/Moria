@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Moria
 {
     class Program
@@ -61,32 +62,70 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
             {
 
             }
-        
-           
-            Game game = new Game
-            {
-                Player = new Player()
-                {
-                    Name = "Asger",
-                    CurrentGold = 0
-                }
-            };
-            game.MakeMap();
             Console.Clear();
-            while (true)
+            bool newGame = true;
+            while (newGame)
             {
+                Console.WriteLine("Enter your name: ");
+                string name = Console.ReadLine();
+                Game game = new Game()
+                {
+                    Player = new Player()
+                    {
+                        Name = name,
+                        CurrentGold = 0,
+                        HealthPoints = 10
+                    }
+                };
+                game.MakeMap();
                 
+                Console.Clear();
 
-                Console.WriteLine(game.Player.CurrentRoom.GetDescription() + "\n");
+                while (game.Playing)
+                {
 
-                game.GetGold();
+                    game.GetDescription();
 
-                game.GetChoices();
+                    game.GetGold();
+                    if (game.Player.CurrentRoom.EndRoom == true)
+                    {
 
+                        game.Playing = false;
+                        game.EndGame();
+                    }
+                    else if (game.Player.CurrentRoom.Monster != null)
+                    {
+                        game.Combat();
+                        Console.Clear();
+                    }
+                    else
+                    {
+                        game.MakeChoices();
+                        Console.Clear();
+                    }
+
+                }
+                Console.WriteLine("Do you want to 'exit' the game or start a 'new game'?");
+                bool awaitingChoice = true;
+                while (awaitingChoice)
+                {
+                    string input = Console.ReadLine().ToLower();
+                    switch (input)
+                    {
+                        case "exit":
+                            awaitingChoice = false;
+                            newGame = false;
+                            break;
+                        case "new game":
+                            awaitingChoice = false;
+                            break;
+                        default:
+                            Console.WriteLine("Type 'exit' to exit the game.\nType 'new game' to start a new game");
+                            break;
+                    }
+                }
                 Console.Clear();
             }
-
-
         }
     }
 }

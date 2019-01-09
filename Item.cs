@@ -10,7 +10,7 @@ namespace Moria
     {
         private string name;
         private int weight;
-        private int goldVvalue;
+        private int goldValue;
         private string description;
 
         public string Description
@@ -18,11 +18,11 @@ namespace Moria
             get { return description; }
             set { description = value; }
         }
-
-        public int GoldVvalue
+         
+        public int GoldValue
         {
-            get { return goldVvalue; }
-            set { goldVvalue = value; }
+            get { return goldValue; }
+            set { goldValue = value; }
         }
 
         public int Weight
@@ -36,6 +36,6 @@ namespace Moria
             get { return name; }
             set { name = value; }
         }
-
+        
     }
 }

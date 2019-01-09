@@ -10,25 +10,70 @@ namespace Moria
     class Game
     {
         private Player player;
+        private bool playing = true;
+        private bool newGame = true;
         private List<Room> roomList = new List<Room>() {
             new Room()
             {
                 Gold = 0,
-                Description = "Start room",
-                ApproachDescription = "Start room"
-            }
-                 ,
+                Description = "You are in a cavernous room with a tiny fire in the middle. The goblin lies dead nearby.",
+                ApproachDescription = "A dark room with a tiny light",
+                Monster = new Enemy() {
+                    Name = "goblin",
+                    Description = "a fearsome goblin with a crooked sword",
+                    Damage = 5,
+                    Health = 2,
+                    Gold = 10,
+                    Loot = new Sword()
+                    {
+                        Name = "Sword",
+                        Description = "a tiny sword",
+                        Damage = 3
+                    }
+                },
+                Loot = new Potion()
+                {
+                    Description = "Healing potion",
+                    Name = "Potion",
+                    Healing = 5
+                },
+                North = new Room()
+                {
+                    Description = "You are in a dark crypt with no light",
+                    ApproachDescription = "a dark crypt down some windy stairs"
+                }
+            },
+
             new Room()
             {
                 Gold = 5,
                 Description = "room1",
-                ApproachDescription = "room1"
+                ApproachDescription = "room1",
+                Loot = new Shield()
+                {
+                    Description = "a tiny shield",
+                    Name = "Shield",
+                    Block = 3
+                }
             },
             new Room()
             {
                 Gold = 5,
                 Description = "room2",
-                ApproachDescription = "room2"
+                ApproachDescription = "room2",
+                Loot = new Potion()
+                {
+                    Description = "Healing potion",
+                    Name = "Potion",
+                    Healing = 5
+                },
+                Monster = new Enemy()
+                {
+                    Name = "Troll",
+                    Description = "a massive troll with rotting teeth and a foul breath",
+                    Damage = 5,
+                    Health = 20
+                }
             },
             new Room()
             {
@@ -44,10 +89,26 @@ namespace Moria
             },
             new Room()
             {
-                Description = "room5",
-                ApproachDescription = "room5"
+                Description = "You come out of the dungeon into the magnificent sunshine!",
+                ApproachDescription = "room5",
+                EndRoom = true
             }
         };
+        
+
+        public bool NewGame
+        {
+            get { return newGame; }
+            set { newGame = value; }
+        }
+
+
+        public bool Playing
+        {
+            get { return playing; }
+            set { playing = value; }
+        }
+
 
         public List<Room> RoomList
         {
@@ -67,14 +128,16 @@ namespace Moria
 
         public void PickupItem()
         {
-            player.Items.Add(player.CurrentRoom.Item);
-            Console.WriteLine($"\nYou picked up {player.CurrentRoom.Item.Name}\n");
-            player.CurrentRoom.Item = null;
+            //puts the item in the players inventory and removes it from the room
+            player.PickupItem(player.CurrentRoom.Loot);
+            Console.WriteLine($"\nYou picked up {player.CurrentRoom.Loot.Name}\n");
+            player.CurrentRoom.Loot = null;
         }
 
         public void SeeItems()
         {
-            if(player.Items != null)
+            // loops through the players items and displays them.
+            if (player.Items != null)
             {
                 Console.WriteLine();
                 foreach (Item item in player.Items)
@@ -84,27 +147,193 @@ namespace Moria
             }
         }
 
-        public void GetChoices()
+        public void GetDescription()
+        //displays the description of the room and its contents
         {
-            List<Room> rooms = Player.CurrentRoom.GetChoices();
-            
-            
+            string output = player.CurrentRoom.Description;
+            if (player.CurrentRoom.Monster == null)
+            {
+                
+                if (player.CurrentRoom.Loot != null)
+                {
+                    output = output + $"\n\nYou found {player.CurrentRoom.Loot.Description}";
+                }
+                if (player.CurrentRoom.Gold > 0)
+                {
+                    output = output + $"\n\nYou found {player.CurrentRoom.Gold} gold";
+                }
+                List<Room> rooms = GetAdjacentRooms();
+                foreach (Room room in rooms)
+                {
+                    output += $"\n\n{room.ApproachDescription} to the {room.RelativeDirection}";
+                }
+            } else
+            {
+                output = $"Before you is {player.CurrentRoom.Monster.Description}. It jumps forward and attacks you,\n dealing {player.CurrentRoom.Monster.Damage} damage.";
+                if(player.Block > 0)
+                {
+                    output += $"You blocked {player.Block} damage.";
+                }
+            }
 
+            Console.WriteLine(output + "\n");
+        }
+
+        public void Combat()
+        {
+            player.HealthPoints -= (player.CurrentRoom.Monster.Damage - player.Block);
+            if(player.HealthPoints <= 0)
+            {                
+                Console.WriteLine("\nYou died from the attack...");
+                Console.ReadKey();
+                playing = false;
+            } else
+            {
+                Console.WriteLine("\nChoose an action");
+                bool awaitingMove = true;
+                while(awaitingMove)
+                {
+                    string input = Console.ReadLine().ToLower();
+                    switch (input)
+                    {
+                        case "attack":
+                            if (player.CurrentRoom.Monster != null)
+                            {
+                                
+                                Console.WriteLine($"You deal {player.Damage} damage to the {player.CurrentRoom.Monster.Name}.\n");
+                                player.CurrentRoom.Monster.Health -= player.Damage;
+                                if (player.CurrentRoom.Monster.Health <= 0)
+                                {
+                                    
+                                    Console.WriteLine($"You defeated the {player.CurrentRoom.Monster.Name}\n");
+                                    awaitingMove = false;
+                                    
+                                    if(player.CurrentRoom.Monster.Gold > 0)
+                                    {
+                                        Console.WriteLine($"You looted {player.CurrentRoom.Monster.Gold} gold from the {player.CurrentRoom.Monster.Name}\n");
+                                        player.CurrentGold += player.CurrentRoom.Monster.Gold;
+                                    }
+                                    if(player.CurrentRoom.Monster.Loot != null)
+                                    {
+                                        Console.WriteLine($"You looted a {player.CurrentRoom.Monster.Loot.Name} from the {player.CurrentRoom.Monster.Name}\n");
+                                        player.PickupItem(player.CurrentRoom.Monster.Loot);
+                                    }
+                                    player.CurrentRoom.Monster = null;
+                                    Console.WriteLine("Press any key to continue.");
+                                    Console.ReadKey();
+                                }
+                                else
+                                {
+                                    
+                                    player.HealthPoints -= (player.CurrentRoom.Monster.Damage - player.Block);
+                                    if (player.HealthPoints <= 0)
+                                    {
+                                        Console.Clear();
+                                        Console.WriteLine($"The {player.CurrentRoom.Monster.Name} lashes out at you and deal {player.CurrentRoom.Monster.Damage} damage");
+                                        Console.WriteLine($"You died...\n");
+                                        Console.ReadKey();
+                                        awaitingMove = false;
+                                        playing = false;
+                                    } else
+                                    {
+                                        Console.WriteLine($"The {player.CurrentRoom.Monster.Name} lashes out at you and deal {player.CurrentRoom.Monster.Damage} damage");
+                                        if (player.Block > 0)
+                                        {
+                                            Console.WriteLine($"You blocked {player.Block} damage."); 
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        case "flee":
+                            switch (player.CurrentRoom.RelativeDirection)
+                            {
+                                case "South":
+                                    player.CurrentRoom = player.CurrentRoom.North;
+                                    awaitingMove = false;
+                                    break;
+                                case "North":
+                                    player.CurrentRoom = player.CurrentRoom.South;
+                                    awaitingMove = false;
+                                    break;
+                                case "East":
+                                    player.CurrentRoom = player.CurrentRoom.West;
+                                    awaitingMove = false;
+                                    break;
+                                case "West":
+                                    player.CurrentRoom = player.CurrentRoom.East;
+                                    awaitingMove = false;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case "help":
+                            Console.WriteLine("\nType 'attack' to attack the enemy\n<<Type 'flee' to flee from the enemy\n");
+                            break;
+                        default:
+                            Console.WriteLine("\ntype help for instructions\n");
+                            break;
+                    }
+                }
+            }
+        }
+
+        private List<Room> GetAdjacentRooms()
+        {
+            //returns a list cotaining the rooms adjacent to the current roomm,
+            //and sets the relative direction of each adjacent room, so they return the correct approach description
+            List<Room> choices = new List<Room>();
+            if (player.CurrentRoom.North != null)
+            {
+                player.CurrentRoom.North.RelativeDirection = "North";
+                choices.Add(player.CurrentRoom.North);
+            }
+
+            if (player.CurrentRoom.South != null)
+            {
+                player.CurrentRoom.South.RelativeDirection = "South";
+                choices.Add(player.CurrentRoom.South);
+            }
+
+            if (player.CurrentRoom.East != null)
+            {
+                player.CurrentRoom.East.RelativeDirection = "East";
+                choices.Add(player.CurrentRoom.East);
+            }
+
+            if (player.CurrentRoom.West != null)
+            {
+                player.CurrentRoom.West.RelativeDirection = "West";
+                choices.Add(player.CurrentRoom.West);
+            }
+
+
+            return choices;
+        }
+
+        public void MakeChoices()
+        {
 
             Console.WriteLine("Choose an action\n");
             bool awaitingMove = true;
-            while(awaitingMove)
+            while (awaitingMove)
             {
-               string input = Console.ReadLine().ToLower();
+                string input = Console.ReadLine().ToLower();
                 switch (input)
                 {
-                    case "go west": 
-                        if(player.CurrentRoom.West != null)
+                    case "cheat":
+                        player.CurrentRoom = roomList[5];
+                        awaitingMove = false;
+                        break;
+                    case "go west":
+                        if (player.CurrentRoom.West != null)
                         {
                             player.CurrentRoom = player.CurrentRoom.West;
 
                             awaitingMove = false;
-                        } else
+                        }
+                        else
                         {
                             Console.WriteLine("You can't go west\n");
                         }
@@ -146,13 +375,57 @@ namespace Moria
                         }
                         break;
                     case "gold":
-                        Console.WriteLine($"You have {player.CurrentGold} gold\n");
+                        Console.WriteLine($"\nYou have {player.CurrentGold} gold\n");
                         break;
-                    case "pick up item":
-                        PickupItem();
+                    case "health":
+                        Console.WriteLine($"\nYou have {player.HealthPoints} health\n");
                         break;
-                    case "see items":
+                    case "help":
+                        Console.WriteLine($"type 'go north' to go north, 'go east' to go east etc.\ntype 'health' to see your healthpoints\nType 'pickup' to pickup items\ntype 'gold' to see your gold\ntype'items' to see what is in your inventory \ntype 'quit' to exit the game\n");
+                        break;
+                    case "quit":
+                        Console.Clear();
+                        Console.WriteLine($"You sit down and wait to die...\n");
+                        Console.ReadKey();
+                        awaitingMove = false;
+                        playing = false;
+                        break;
+                    case "pickup":
+                        if(player.CurrentRoom.Loot != null)
+                        {
+                            PickupItem();
+                        } else
+                        {
+                            Console.WriteLine("There is no item to pick up");
+                        }
+                        break;
+                    case "items":
                         SeeItems();
+                        break;
+                    case "use potion":
+                        Item potion = null;
+                        foreach (Item item in player.Items)
+                        {
+                            if (item is Potion)
+                            {
+                                Potion p = (Potion)item;
+                                
+                                player.HealthPoints += p.Healing;
+
+                                Console.WriteLine($"\nYou drink a potion and gain {p.Healing} health!\n");
+
+                                potion = item;
+                                break;
+                            }
+                        }
+                        if (potion != null)
+                        {
+                            player.Items.Remove(potion);
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nYou don't have a potion\n");
+                        }
                         break;
                     default:
                         Console.WriteLine("\ntype help for instructions\n");
@@ -160,21 +433,37 @@ namespace Moria
                 }
             }
         }
+        public void EndGame()
+        {
+            Console.WriteLine($"You found the exit! You got away with {player.CurrentGold} gold!");
+            List<string> scores = Highscore.SaveScore(player.CurrentGold, player.Name);
+            Console.WriteLine("Highscores:\n");
+            foreach (string s in scores)
+            {
+                Console.WriteLine(s);
+            }
+            Console.ReadKey();
+
+        }
+
+       
 
         public void MakeMap()
         {
+            //makes a map with a random layout
+            Room[,] roomMap = new Room[5, 5];
 
-            Room[,] roomMap = new Room[8, 8];
-
-            
 
             Random rnd = new Random();
 
+
             int xpos = 0;
 
-            int ypos = 2;
+            int ypos = 3;
 
             int lastDir = 1;
+
+
 
             int rooms = 0;
 
@@ -183,7 +472,7 @@ namespace Moria
                 if (roomMap[xpos, ypos] == null)
                 {
 
-                    
+
                     roomMap[xpos, ypos] = roomList[rooms];
                     if (xpos - 1 >= 0)
                     {
@@ -219,7 +508,7 @@ namespace Moria
                     }
                     rooms++;
                 }
-               
+
 
                 int dir = rnd.Next(4);
 
@@ -266,8 +555,8 @@ namespace Moria
 
 
             }
-
-            player.CurrentRoom = RoomList[0];
+            RoomList[0].North.South = roomList[0];
+            player.CurrentRoom = RoomList[0].North;
         }
     }
 }

@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Moria
 {
-    class Sword : Item
+    class Potion : Item
     {
-        private int damage = 6;
+        private int healing;
 
-        public int Damage
+        public int Healing
         {
-            get { return damage; }
-            set { damage = value; }
+            get { return healing; }
+            set { healing = value; }
         }
-
+        
     }
 }

@@ -12,17 +12,32 @@ namespace Moria
         private Room south;
         private Room east;
         private Room west;
-        private string relativeDirection;
+        private string relativeDirection;       
         private string approachDescription;
-        private Item item = new Sword() {
-            Description = "a tiny sword",
-            Name = "Bobs Sword"
-        };
+        private int gold;
+        private string description;
+        private Item loot;
+        private bool endRoom;
+        private Enemy monster;
 
-        public Item Item
+        public Enemy Monster
         {
-            get { return item; }
-            set { item = value; }
+            get { return monster; }
+            set { monster = value; }
+        }
+
+
+        public bool EndRoom
+        {
+            get { return endRoom; }
+            set { endRoom = value; }
+        }
+
+
+        public Item Loot
+        {
+            get { return loot; }
+            set { loot = value; }
         }
 
 
@@ -32,8 +47,7 @@ namespace Moria
             set { approachDescription = value; }
         }
 
-        private int gold;
-        private string description;
+        
 
         public string RelativeDirection
         {
@@ -81,52 +95,6 @@ namespace Moria
             get { return north; }
             set { north = value; }
         }
-        public string GetDescription()
-        {
-            string output = Description;
-            if(Item != null)
-            {
-                output = output + $"\n\n You found {Item.Description}";
-            }
-            if(Gold > 0)
-            {
-                output = output + $"\n\n You found {Gold} gold";
-            }
-            List < Room > rooms = GetChoices();
-            foreach (Room room in rooms)
-            {
-                output += $"\n\n {room.ApproachDescription} to the {room.RelativeDirection}";
-            }
-            return output;
-        }
-        public List<Room> GetChoices()
-        {
-            List<Room> choices = new List<Room>();
-            if(North != null)
-            {
-                North.RelativeDirection = "North";
-                choices.Add(North);
-            }
-
-            if(South != null)
-            {
-                South.RelativeDirection = "South";
-                choices.Add(South);
-            }
-
-            if(East != null)
-            {
-                East.RelativeDirection = "East";
-                choices.Add(East);
-            }
-
-            if (West != null)
-            {
-                West.RelativeDirection = "West";
-                choices.Add(West);
-            }
-            return choices;
-        }
-
+        
     }
 }

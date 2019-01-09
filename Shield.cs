@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Moria
 {
-    class Sword : Item
+    class Shield : Item
     {
-        private int damage = 6;
+        private int block;
 
-        public int Damage
+        public int Block
         {
-            get { return damage; }
-            set { damage = value; }
+            get { return block; }
+            set { block = value; }
         }
 
     }
